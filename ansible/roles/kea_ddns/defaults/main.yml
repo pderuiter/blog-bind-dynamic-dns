@@ -1,0 +1,28 @@
+---
+kea_ddns_packages:
+  - kea-dhcp4-server
+  - kea-dhcp-ddns-server
+
+# kea-dhcp4.conf (section "DHCP Server Configuration")
+kea_ddns_interfaces:
+  - eth0
+kea_ddns_lease_file: /var/lib/kea/kea-leases4.csv
+kea_ddns_qualifying_suffix: internal.example.com.
+kea_ddns_generated_prefix: dhcp
+kea_ddns_subnet_id: 1
+kea_ddns_subnet: 192.168.1.0/24
+kea_ddns_pool: 192.168.1.100 - 192.168.1.200
+kea_ddns_routers: 192.168.1.1
+kea_ddns_domain_name: internal.example.com
+kea_ddns_domain_name_servers: 192.168.1.10
+
+# kea-dhcp-ddns.conf (section "DHCP-DDNS (D2) Configuration")
+kea_ddns_d2_address: 127.0.0.1
+kea_ddns_d2_port: 53001
+kea_ddns_tsig_key_name: dhcp-key
+kea_ddns_tsig_algorithm: HMAC-SHA256
+# Same secret as the dhcp-key in BIND; set it from ansible-vault
+kea_ddns_tsig_secret: ""
+kea_ddns_forward_zone: internal.example.com.
+kea_ddns_reverse_zone: 1.168.192.in-addr.arpa.
+kea_ddns_dns_server: 192.168.1.10

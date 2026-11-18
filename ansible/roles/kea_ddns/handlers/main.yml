@@ -1,0 +1,10 @@
+---
+- name: Restart kea-dhcp-ddns-server
+  ansible.builtin.service:
+    name: kea-dhcp-ddns-server
+    state: restarted
+
+- name: Restart kea-dhcp4-server
+  ansible.builtin.service:
+    name: kea-dhcp4-server
+    state: restarted

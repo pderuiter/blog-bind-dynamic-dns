@@ -1,0 +1,12 @@
+---
+- name: BIND with dynamic zones and TSIG keys
+  hosts: dns_servers
+  gather_facts: true
+  roles:
+    - role: bind_ddns
+
+- name: Kea DHCPv4 and DHCP-DDNS (D2) updating BIND
+  hosts: dhcp_servers
+  gather_facts: true
+  roles:
+    - role: kea_ddns

@@ -1,0 +1,13 @@
+; {{ ansible_managed }} (initial content only; named owns this file afterwards)
+$TTL 3600
+@   IN  SOA {{ bind_ddns_ns_name }} hostmaster.{{ item.name }}. (
+            1          ; Serial (named increments it on every update)
+            3600       ; Refresh
+            900        ; Retry
+            604800     ; Expire
+            300 )      ; Negative TTL
+
+@       IN  NS  {{ bind_ddns_ns_name }}
+{% if bind_ddns_ns_name | regex_replace('^[^.]+\\.', '') == item.name + '.' %}
+{{ bind_ddns_ns_name | regex_replace('\\..*$', '') }}     IN  A   {{ bind_ddns_server_address }}
+{% endif %}

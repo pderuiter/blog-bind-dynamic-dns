@@ -1,0 +1,5 @@
+---
+- name: Restore SELinux context on dynamic zones
+  ansible.builtin.command: restorecon -Rv {{ bind_ddns_zone_dir }}
+  register: bind_ddns_restorecon
+  changed_when: bind_ddns_restorecon.stdout | length > 0

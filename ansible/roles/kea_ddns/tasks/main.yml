@@ -1,0 +1,48 @@
+---
+- name: Check the platform
+  ansible.builtin.assert:
+    that: ansible_facts['os_family'] == 'Debian'
+    fail_msg: The post installs Kea from the Debian/Ubuntu packages; other platforms are not covered.
+
+- name: Check that the TSIG secret is set
+  ansible.builtin.assert:
+    that: kea_ddns_tsig_secret | length > 0
+    fail_msg: Set kea_ddns_tsig_secret (from ansible-vault) to the dhcp-key secret BIND uses.
+  no_log: true
+
+- name: Install Kea DHCPv4 and DHCP-DDNS
+  ansible.builtin.apt:
+    name: "{{ kea_ddns_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Write kea-dhcp4.conf
+  ansible.builtin.template:
+    src: kea-dhcp4.conf.j2
+    dest: /etc/kea/kea-dhcp4.conf
+    owner: root
+    group: _kea
+    mode: "0640"
+    validate: kea-dhcp4 -t %s
+  notify: Restart kea-dhcp4-server
+
+- name: Write kea-dhcp-ddns.conf (holds the TSIG secret)
+  ansible.builtin.template:
+    src: kea-dhcp-ddns.conf.j2
+    dest: /etc/kea/kea-dhcp-ddns.conf
+    owner: root
+    group: _kea
+    mode: "0640"
+    validate: kea-dhcp-ddns -t %s
+  no_log: true
+  notify: Restart kea-dhcp-ddns-server
+
+- name: Enable and start D2 and the DHCPv4 server
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - kea-dhcp-ddns-server
+    - kea-dhcp4-server

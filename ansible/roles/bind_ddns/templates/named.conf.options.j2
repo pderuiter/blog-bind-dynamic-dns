@@ -1,0 +1,17 @@
+// {{ ansible_managed }}
+options {
+    directory "{{ bind_directory }}";
+{% for line in bind_platform_options %}
+    {{ line }}
+{% endfor %}
+
+    listen-on port 53 { any; };
+    listen-on-v6 port 53 { any; };
+
+    recursion no;
+    allow-query { any; };
+    allow-transfer { none; };
+
+    dnssec-validation auto;
+    version "not disclosed";
+};

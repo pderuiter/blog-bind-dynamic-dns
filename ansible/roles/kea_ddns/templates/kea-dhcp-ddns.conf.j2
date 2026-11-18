@@ -1,0 +1,38 @@
+// {{ ansible_managed }}
+{
+  "DhcpDdns": {
+    "ip-address": "{{ kea_ddns_d2_address }}",
+    "port": {{ kea_ddns_d2_port }},
+
+    // Key for DNS updates (same name and secret as in BIND)
+    "tsig-keys": [
+      {
+        "name": "{{ kea_ddns_tsig_key_name }}",
+        "algorithm": "{{ kea_ddns_tsig_algorithm }}",
+        "secret": "{{ kea_ddns_tsig_secret }}"
+      }
+    ],
+
+    // Forward zone
+    "forward-ddns": {
+      "ddns-domains": [
+        {
+          "name": "{{ kea_ddns_forward_zone }}",
+          "key-name": "{{ kea_ddns_tsig_key_name }}",
+          "dns-servers": [ { "ip-address": "{{ kea_ddns_dns_server }}" } ]
+        }
+      ]
+    },
+
+    // Reverse zone
+    "reverse-ddns": {
+      "ddns-domains": [
+        {
+          "name": "{{ kea_ddns_reverse_zone }}",
+          "key-name": "{{ kea_ddns_tsig_key_name }}",
+          "dns-servers": [ { "ip-address": "{{ kea_ddns_dns_server }}" } ]
+        }
+      ]
+    }
+  }
+}

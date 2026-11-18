@@ -1,0 +1,10 @@
+---
+# Copy to vault.yml, replace the secrets and encrypt:
+#   cp vault.yml.example vault.yml
+#   ansible-vault encrypt group_vars/all/vault.yml
+# Generate each secret with: tsig-keygen -a hmac-sha256 <key-name>
+# (copy the value between the quotes after "secret").
+vault_ddns_ddns_key_secret: "REPLACE-with-base64-secret-from-tsig-keygen"
+vault_ddns_dhcp_key_secret: "REPLACE-with-base64-secret-from-tsig-keygen"
+vault_ddns_k8s_update_key_secret: "REPLACE-with-base64-secret-from-tsig-keygen"
+vault_ddns_admin_update_key_secret: "REPLACE-with-base64-secret-from-tsig-keygen"

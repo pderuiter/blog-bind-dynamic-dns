@@ -1,0 +1,47 @@
+// {{ ansible_managed }}
+{
+  "Dhcp4": {
+    "interfaces-config": {
+      "interfaces": {{ kea_ddns_interfaces | to_json }}
+    },
+
+    "lease-database": {
+      "type": "memfile",
+      "persist": true,
+      "name": "{{ kea_ddns_lease_file }}"
+    },
+
+    // Hand DNS work to kea-dhcp-ddns (D2) on localhost
+    "dhcp-ddns": {
+      "enable-updates": true{% if kea_ddns_d2_address != '127.0.0.1' or kea_ddns_d2_port != 53001 %},
+      "server-ip": "{{ kea_ddns_d2_address }}",
+      "server-port": {{ kea_ddns_d2_port }}{% endif %}
+
+    },
+
+    // Kea updates both forward and reverse zones itself,
+    // even if the client asks to do its own forward update
+    "ddns-send-updates": true,
+    "ddns-override-client-update": true,
+    "ddns-qualifying-suffix": "{{ kea_ddns_qualifying_suffix }}",
+
+    // Clients without a hostname get {{ kea_ddns_generated_prefix }}-192-168-1-100 etc.
+    "ddns-replace-client-name": "when-not-present",
+    "ddns-generated-prefix": "{{ kea_ddns_generated_prefix }}",
+    "hostname-char-set": "[^A-Za-z0-9.-]",
+    "hostname-char-replacement": "-",
+
+    "subnet4": [
+      {
+        "id": {{ kea_ddns_subnet_id }},
+        "subnet": "{{ kea_ddns_subnet }}",
+        "pools": [ { "pool": "{{ kea_ddns_pool }}" } ],
+        "option-data": [
+          { "name": "routers", "data": "{{ kea_ddns_routers }}" },
+          { "name": "domain-name", "data": "{{ kea_ddns_domain_name }}" },
+          { "name": "domain-name-servers", "data": "{{ kea_ddns_domain_name_servers }}" }
+        ]
+      }
+    ]
+  }
+}

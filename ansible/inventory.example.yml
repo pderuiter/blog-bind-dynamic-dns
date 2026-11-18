@@ -1,0 +1,15 @@
+---
+# Or generate it: cd ../terraform && terraform output -raw ansible_inventory > ../ansible/inventory.yml
+# BIND and Kea can also share one host: put it in both groups.
+all:
+  vars:
+    ansible_user: ansible
+  children:
+    dns_servers:
+      hosts:
+        ns1:
+          ansible_host: 192.168.1.10
+    dhcp_servers:
+      hosts:
+        dhcp1:
+          ansible_host: 192.168.1.5

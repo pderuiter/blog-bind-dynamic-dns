@@ -1,0 +1,81 @@
+---
+- name: Load distribution-specific settings
+  ansible.builtin.include_vars: "{{ ansible_facts['os_family'] }}.yml"
+
+- name: Write the TSIG key files
+  ansible.builtin.template:
+    src: key.j2
+    dest: "{{ bind_keys_dir }}/{{ item.file }}"
+    owner: root
+    group: "{{ bind_group }}"
+    mode: "0440"
+  loop: "{{ bind_ddns_keys }}"
+  loop_control:
+    label: "{{ item.name }}"
+  no_log: true
+  notify: Bind config changed
+
+- name: Create the directory for dynamic zones
+  ansible.builtin.file:
+    path: "{{ bind_ddns_zone_dir }}"
+    state: directory
+    owner: "{{ bind_user }}"
+    group: "{{ bind_group }}"
+    mode: "0750"
+
+- name: Label the dynamic zone directory for SELinux (RHEL)
+  community.general.sefcontext:
+    target: "{{ bind_ddns_zone_dir }}(/.*)?"
+    setype: named_zone_t
+    state: present
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['selinux']['status'] | default('disabled') == 'enabled'
+  notify: Restore SELinux context on dynamic zones
+
+- name: Create the log directory
+  ansible.builtin.file:
+    path: "{{ bind_ddns_log_dir }}"
+    state: directory
+    owner: "{{ bind_user }}"
+    group: "{{ bind_group }}"
+    mode: "0755"
+  when: bind_ddns_update_logging
+
+# Only when missing: once named accepts updates it owns the zone file and journal.
+- name: Create initial zone files
+  ansible.builtin.template:
+    src: zone.j2
+    dest: "{{ bind_ddns_zone_dir }}/{{ item.file }}"
+    owner: "{{ bind_user }}"
+    group: "{{ bind_group }}"
+    mode: "0644"
+    force: false
+    validate: named-checkzone {{ item.name }} %s
+  loop: "{{ bind_ddns_zones }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify: Bind config changed
+
+- name: Write the options
+  ansible.builtin.template:
+    src: named.conf.options.j2
+    dest: "{{ bind_options_conf }}"
+    owner: root
+    group: "{{ bind_group }}"
+    mode: "0640"
+  notify: Bind config changed
+
+- name: Write key includes, dynamic zones and update logging
+  ansible.builtin.template:
+    src: named.conf.local.j2
+    dest: "{{ bind_local_conf }}"
+    owner: root
+    group: "{{ bind_group }}"
+    mode: "0640"
+  notify: Bind config changed
+
+- name: Start named with the new configuration
+  ansible.builtin.include_role:
+    name: bind
+    tasks_from: start

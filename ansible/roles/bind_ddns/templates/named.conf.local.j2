@@ -1,0 +1,40 @@
+// {{ ansible_managed }}
+{% for key in bind_ddns_keys %}
+include "{{ bind_keys_dir }}/{{ key.file }}";
+{% endfor %}
+
+{% for zone in bind_ddns_zones %}
+zone "{{ zone.name }}" {
+    type primary;
+    file "{{ bind_ddns_zone_dir }}/{{ zone.file }}";
+{% if zone.allow_update is defined %}
+    allow-update { {% for m in zone.allow_update %}{{ m }}; {% endfor %}};
+{% endif %}
+{% if zone.update_policy is defined %}
+    update-policy {
+{% for rule in zone.update_policy %}
+        {{ rule }};
+{% endfor %}
+    };
+{% endif %}
+{% if zone.journal | default(false) %}
+
+    // Journal file for tracking updates
+    journal "{{ bind_ddns_zone_dir }}/{{ zone.file }}.jnl";
+{% endif %}
+};
+
+{% endfor %}
+{% if bind_ddns_update_logging %}
+logging {
+    channel update_log {
+        file "{{ bind_ddns_log_dir }}/update.log" versions 5 size 10m;
+        severity debug;
+        print-time yes;
+        print-category yes;
+    };
+
+    category update { update_log; };
+    category update-security { update_log; };
+};
+{% endif %}

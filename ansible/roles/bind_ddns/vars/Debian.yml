@@ -1,0 +1,4 @@
+---
+# AppArmor on Ubuntu only lets named write below /var/lib/bind and /var/cache/bind,
+# so the dynamic zones live in /var/lib/bind/dynamic instead of /var/named/dynamic.
+bind_ddns_zone_dir: /var/lib/bind/dynamic

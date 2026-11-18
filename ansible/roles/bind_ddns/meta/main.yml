@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  role_name: bind_ddns
+  namespace: pderuiter
+  author: Patrick de Ruiter
+  description: BIND 9 dynamic zones with TSIG keys, allow-update and update-policy rules
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+    - name: EL
+      versions:
+        - "9"
+  galaxy_tags:
+    - dns
+    - bind
+
+dependencies:
+  - role: bind

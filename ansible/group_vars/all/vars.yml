@@ -1,0 +1,39 @@
+---
+# --- BIND (dns_servers) ----------------------------------------------------
+bind_ddns_server_address: 192.168.1.10
+bind_ddns_ns_name: ns1.example.com.
+
+# The post's keys, one file each under /etc/bind/keys (RHEL: /etc/named/keys)
+bind_ddns_keys:
+  - name: ddns-key
+    file: ddns.key
+    algorithm: hmac-sha256
+    secret: "{{ vault_ddns_ddns_key_secret }}"
+  - name: dhcp-key
+    file: dhcp.key
+    algorithm: hmac-sha256
+    secret: "{{ vault_ddns_dhcp_key_secret }}"
+  - name: k8s-update-key
+    file: kubernetes.key
+    algorithm: hmac-sha256
+    secret: "{{ vault_ddns_k8s_update_key_secret }}"
+  - name: admin-update-key
+    file: admin.key
+    algorithm: hmac-sha256
+    secret: "{{ vault_ddns_admin_update_key_secret }}"
+
+# Zones and policies: see roles/bind_ddns/defaults/main.yml (the post's set)
+
+# --- Kea (dhcp_servers) ----------------------------------------------------
+kea_ddns_interfaces:
+  - eth0
+kea_ddns_subnet: 192.168.1.0/24
+kea_ddns_pool: 192.168.1.100 - 192.168.1.200
+kea_ddns_routers: 192.168.1.1
+kea_ddns_domain_name: internal.example.com
+kea_ddns_domain_name_servers: 192.168.1.10
+kea_ddns_dns_server: 192.168.1.10
+kea_ddns_forward_zone: internal.example.com.
+kea_ddns_reverse_zone: 1.168.192.in-addr.arpa.
+kea_ddns_tsig_key_name: dhcp-key
+kea_ddns_tsig_secret: "{{ vault_ddns_dhcp_key_secret }}"

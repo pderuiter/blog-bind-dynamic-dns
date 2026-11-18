@@ -1,0 +1,2 @@
+---
+bind_ddns_zone_dir: /var/named/dynamic

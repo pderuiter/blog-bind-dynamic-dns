@@ -1,0 +1,41 @@
+---
+# TSIG keys, one file each (the post's names). Secrets come from ansible-vault.
+# Generate a secret with: tsig-keygen -a hmac-sha256 <name>
+bind_ddns_keys: []
+#  - name: ddns-key
+#    file: ddns.key
+#    algorithm: hmac-sha256
+#    secret: "{{ vault_bind_ddns_ddns_key_secret }}"
+
+# Name server written into the initial zone files
+bind_ddns_ns_name: ns1.example.com.
+bind_ddns_server_address: 192.168.1.10
+
+# Dynamic zones. Each zone has either allow_update (list of match elements)
+# or update_policy (list of grant/deny rules), as in the post.
+bind_ddns_zones:
+  - name: dynamic.example.com
+    file: dynamic.example.com.zone
+    allow_update:
+      - key "ddns-key"
+    journal: true
+  - name: internal.example.com
+    file: internal.example.com.zone
+    update_policy:
+      - grant dhcp-key subdomain internal.example.com A AAAA DHCID
+  - name: 1.168.192.in-addr.arpa
+    file: 192.168.1.rev
+    update_policy:
+      - grant dhcp-key subdomain 1.168.192.in-addr.arpa PTR DHCID
+  - name: k8s.example.com
+    file: k8s.example.com.zone
+    update_policy:
+      - grant k8s-update-key subdomain k8s.example.com ANY
+  - name: example.com
+    file: example.com.zone
+    update_policy:
+      - grant admin-update-key zonesub ANY
+
+# Update logging from the Troubleshooting section
+bind_ddns_update_logging: true
+bind_ddns_log_dir: /var/log/named

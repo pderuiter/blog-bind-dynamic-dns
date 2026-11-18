@@ -1,0 +1,6 @@
+---
+# community.general provides sefcontext (SELinux labels for the dynamic zone
+# directory on RHEL). Tested with ansible-core 2.20.1.
+collections:
+  - name: community.general
+    version: 13.5.1

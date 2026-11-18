@@ -1,0 +1,14 @@
+proxmox_endpoint  = "https://pve.example.com:8006/"
+proxmox_api_token = "terraform@pve!blog=00000000-0000-0000-0000-000000000000"
+proxmox_insecure  = false
+node_name         = "pve"
+vm_datastore_id   = "local-lvm"
+bridge            = "vmbr1" # an isolated bridge: Kea hands out leases on it
+gateway           = "192.168.1.1"
+dns_servers       = ["192.168.1.10"]
+ssh_public_key    = "ssh-ed25519 AAAAC3Nza... you@example.com"
+
+vms = {
+  ns1   = { ip = "192.168.1.10/24", groups = ["dns_servers"] }
+  dhcp1 = { ip = "192.168.1.5/24", groups = ["dhcp_servers"] }
+}
