@@ -82,6 +82,19 @@ EOF
 dig @192.168.1.10 +short web.dynamic.example.com
 ```
 
+A record and its PTR by hand (the post's "Reverse DNS Updates"): use `dhcp-key`, the only key
+granted on both `internal.example.com` (A) and the reverse zone (PTR). `ddns-key` gets `REFUSED` there.
+
+```bash
+sudo nsupdate -k /etc/bind/keys/dhcp.key <<EOF
+server 192.168.1.10
+zone 1.168.192.in-addr.arpa
+update add 100.1.168.192.in-addr.arpa 300 PTR hostname.example.com.
+send
+EOF
+dig @192.168.1.10 +short -x 192.168.1.100
+```
+
 After a client on the DHCP subnet gets a lease:
 
 ```bash
